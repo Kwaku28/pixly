@@ -18,17 +18,22 @@ import FileUploader from "../shared/FileUploader";
 import { PostValidation } from "@/lib/validations";
 import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-import { useCreatePost, useUpdatePost } from "@/lib/react-query/queriesAndMutations";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  useCreatePost,
+  useUpdatePost,
+} from "@/lib/react-query/queriesAndMutations";
 
 type PostFormProps = {
   post?: Models.Document;
   action: "Create" | "Update";
-}
+};
 
 const PostForm = ({ post, action }: PostFormProps) => {
-  const { mutateAsync: createPost, isPending: isLoadingCreate } = useCreatePost();
-  const { mutateAsync: updatePost, isPending: isLoadingUpdate } = useUpdatePost();
+  const { mutateAsync: createPost, isPending: isLoadingCreate } =
+    useCreatePost();
+  const { mutateAsync: updatePost, isPending: isLoadingUpdate } =
+    useUpdatePost();
   const { user } = useUserContext();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -44,36 +49,35 @@ const PostForm = ({ post, action }: PostFormProps) => {
   });
 
   async function onSubmit(values: z.infer<typeof PostValidation>) {
-    if(post && action === "Update") {
+    if (post && action === "Update") {
       const updatedPost = await updatePost({
         ...values,
         postId: post.$id,
         imageId: post?.imageId,
-        imageUrl: post?.imageUrl
-      })
+        imageUrl: post?.imageUrl,
+      });
 
-      if(!updatedPost) {
+      if (!updatedPost) {
         toast({
-          title: "Please try again"
-        })
+          title: "Please try again",
+        });
       }
 
-      return navigate(`/posts/${post.$id}`)
+      return navigate(`/posts/${post.$id}`);
     }
 
     const newPost = await createPost({
       ...values,
       userId: user.id,
-    })
+    });
 
-    if(!newPost) {
+    if (!newPost) {
       toast({
-        title: "Please try again"
-      })
+        title: "Please try again",
+      });
     }
 
-    navigate('/')
-
+    navigate("/");
   }
 
   return (
@@ -149,14 +153,14 @@ const PostForm = ({ post, action }: PostFormProps) => {
         />
         <div className="flex gap-4 items-center justify-end">
           <Button type="button" className="shad-button_dark_4">
-            Cancel
+            <Link to="/">Cancel</Link>
           </Button>
           <Button
             type="submit"
             className="shad-button_primary whitespace-nowrap"
             disabled={isLoadingCreate || isLoadingUpdate}
           >
-            {isLoadingCreate || isLoadingUpdate && "Loading..."}
+            {isLoadingCreate || (isLoadingUpdate && "Loading...")}
             {action} Post
           </Button>
         </div>
